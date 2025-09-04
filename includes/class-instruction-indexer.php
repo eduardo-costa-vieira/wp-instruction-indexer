@@ -253,14 +253,29 @@ class Instruction_Indexer {
     /** Indexação em lote 10/10 */
     public function index_all($batch=10,$mode='auto'){
         $ids = $this->next_pending_post_ids($batch);
-        $count = 0;
+        $count_ok = 0;
+        $count_no_items = 0;
+        $skipped_ids = [];
+        $skipped_urls = [];
         foreach($ids as $id){
             $res = $this->index_one($id,'',false,$mode);
-            if (is_array($res) && ($res['status'] ?? '') === 'ok'){
-                $count++;
+            if (is_array($res)){
+                $status = $res['status'] ?? '';
+                if ($status === 'ok'){
+                    $count_ok++;
+                } elseif ($status === 'no_items'){
+                    $count_no_items++;
+                    $skipped_ids[] = intval($id);
+                    $skipped_urls[] = esc_url_raw(get_permalink($id));
+                }
             }
         }
-        return $count;
+        return [
+            'processed' => $count_ok,
+            'skipped'   => $count_no_items,
+            'skipped_ids' => $skipped_ids,
+            'skipped_urls' => $skipped_urls,
+        ];
     }
 
     /** Lista base de stopwords PT-BR (normalizadas sem acento) */

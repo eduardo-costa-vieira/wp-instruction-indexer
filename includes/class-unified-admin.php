@@ -246,8 +246,8 @@ class Admin {
         self::check_ajax();
         $batch = isset($_POST['batch']) ? max(1,min(100,intval($_POST['batch']))) : 10;
         $idx = new Instruction_Indexer();
-        $n = $idx->index_all($batch, 'auto');
-        wp_send_json_success(['processed'=>$n]);
+        $stats = $idx->index_all($batch, 'auto');
+        wp_send_json_success($stats);
     }
 
     // ---------- Synonyms actions ----------

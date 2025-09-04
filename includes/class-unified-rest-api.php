@@ -48,6 +48,7 @@ class REST {
     public static function st_index_all($req){
         $batch = max(1,min(100,intval($req['batch'] ?? 10)));
         $idx = new Instruction_Indexer();
-        return rest_ensure_response(['processed'=>$idx->index_all($batch,'auto')]);
+        $stats = $idx->index_all($batch,'auto');
+        return rest_ensure_response($stats);
     }
 }
