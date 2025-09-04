@@ -64,7 +64,8 @@
   function updateCounters(kind, delta){
     const c = (kind==='st') ? WPUI.counts_st : WPUI.counts_ft;
     if (delta && typeof delta.indexed === 'number'){
-      c.indexed += delta.indexed;
+      c.indexed = parseInt(c.indexed, 10) + delta.indexed;
+      c.published = parseInt(c.published, 10);
       c.pending = Math.max(0, c.published - c.indexed);
     }
     const wrap = $('.wpui-wrap');

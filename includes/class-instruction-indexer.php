@@ -108,6 +108,7 @@ class Instruction_Indexer {
         preg_match_all('/<(h[2-6])[^>]*>(.*?)<\/\\1>/is', $html, $matches, PREG_SET_ORDER);
         $items = [];
 
+        $counter = 1;
         foreach($matches as $m){
             $title = wp_strip_all_tags($m[2]);
 
@@ -116,7 +117,8 @@ class Instruction_Indexer {
                 $item_id = $mm[1];
                 $item_title = trim($mm[2]) ?: $title;
             } else {
-                $item_id = '';
+                // Gera um ID sequencial para itens sem numeração
+                $item_id = (string) $counter++;
                 $item_title = $title;
             }
 
