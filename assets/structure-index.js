@@ -77,19 +77,34 @@
   async function loopIndexAll($btn){
     const kind = 'st';
     let totalIndexedNow = 0;
+    let totalSkippedNow = 0;
+    let skippedURLs = [];
     setBusy($btn, true, $btn.data('label') || 'Indexando...');
     while(true){
       const json = await callAPI('structure/index-all', {batch:10}, 'wpui_structure_index_all');
       const processed = (json && json.processed) ? parseInt(json.processed,10) : 0;
+      const skipped = (json && json.skipped) ? parseInt(json.skipped,10) : 0;
       if (processed>0){
         totalIndexedNow += processed;
         updateCounters(kind, {indexed: processed});
         $btn.text(($btn.data('label') || 'Indexando...')+' '+totalIndexedNow);
       }
-      if (processed < 10 || (WPUI.counts_st.pending <= 0)) break;
+      if (skipped>0){
+        totalSkippedNow += skipped;
+        if (Array.isArray(json.skipped_urls)) skippedURLs = skippedURLs.concat(json.skipped_urls);
+      }
+      if ((processed + skipped) < 10 || processed === 0 || (WPUI.counts_st.pending <= 0)) break;
     }
     setBusy($btn, false);
-    uiToast('Indexação da Estrutura concluída.');
+    let msg = 'Indexação da Estrutura concluída.';
+    if (totalSkippedNow>0){
+      msg += ' '+totalSkippedNow+' pulado'+(totalSkippedNow>1?'s':'')+'.';
+    }
+    uiToast(msg);
+    if (totalSkippedNow>0 && skippedURLs.length){
+      const list = skippedURLs.map(url=>'<li><a target="_blank" href="'+url+'">'+url+'</a></li>').join('');
+      showModal('<p>Posts ignorados por falta de estrutura:</p><ul>'+list+'</ul>');
+    }
     $('.wpui-refresh').trigger('click');
   }
 
