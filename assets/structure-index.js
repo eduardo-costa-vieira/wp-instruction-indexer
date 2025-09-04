@@ -97,17 +97,21 @@
     const url = $('.wpui-url-st').val().trim();
     if (!id && !url){ uiToast('Informe ID ou URL.', 'error'); return; }
     setBusy($btn, true, 'Indexando...');
-    const json = await callAPI('structure/index-one', {id, url, force_reindex: true, mode:'manual'}, 'wpui_structure_index_one');
+    const json = await callAPI('structure/index-one', {id, url, mode:'manual'}, 'wpui_structure_index_one');
     setBusy($btn, false);
     if (json && (json.status==='ok' || json.success)){
       updateCounters('st', {indexed:1});
       uiToast('Estrutura indexada.');
       $('.wpui-refresh').trigger('click');
+    } else if (json && json.status==='already_indexed'){
+      uiToast('Instrução já indexada.', 'error');
     } else if (json && json.status==='no_items'){
       uiToast('Sem estrutura suficiente (mín. 3 itens).', 'error');
     } else {
       uiToast('Falha ao indexar.', 'error');
     }
+    $('.wpui-id-st').val('');
+    $('.wpui-url-st').val('');
   }
 
   // Expandir: carregar itens por post_id e mostrar modal
@@ -214,8 +218,16 @@
     // Refresh
     $('.wpui-refresh').off('click').on('click', function(e){
       e.preventDefault();
-      const href = $(this).attr('href') || window.location.href;
-      window.location.href = href;
+      window.location.reload();
+    });
+
+    // Search-as-you-type
+    $('.wpui-wrap').on('input', 'input[name="s"]', function(){
+      const $inp = $(this);
+      clearTimeout($inp.data('timer'));
+      $inp.data('timer', setTimeout(()=>{
+        $inp.closest('form').submit();
+      }, 400));
     });
   }
 

@@ -82,18 +82,19 @@
     const url = $('.wpui-url-ft').val().trim();
     if (!id && !url){ uiToast('Informe ID ou URL.', 'error'); return; }
     setBusy($btn, true, 'Indexando...');
-    const json = await callAPI('fulltext/index-one', {id, url, force_reindex: true, mode:'manual'}, 'wpui_fulltext_index_one');
+    const json = await callAPI('fulltext/index-one', {id, url, mode:'manual'}, 'wpui_fulltext_index_one');
     setBusy($btn, false);
     if (json && (json.status==='ok' || json.success)){
       updateCounters('ft', {indexed:1});
       uiToast('Indexado com sucesso.');
       $('.wpui-refresh').trigger('click');
     } else if (json && json.status==='already_indexed'){
-      uiToast('Já indexado. Reindex feito.', 'success');
-      $('.wpui-refresh').trigger('click');
+      uiToast('Instrução já indexada.', 'error');
     } else {
       uiToast('Falha ao indexar.', 'error');
     }
+    $('.wpui-id-ft').val('');
+    $('.wpui-url-ft').val('');
   }
 
   function bind(){
@@ -121,8 +122,16 @@
     // Refresh (forçar clean reload da página atual)
     $('.wpui-refresh').off('click').on('click', function(e){
       e.preventDefault();
-      const href = $(this).attr('href') || window.location.href;
-      window.location.href = href;
+      window.location.reload();
+    });
+
+    // Search-as-you-type
+    $('.wpui-wrap').on('input', 'input[name="s"]', function(){
+      const $inp = $(this);
+      clearTimeout($inp.data('timer'));
+      $inp.data('timer', setTimeout(()=>{
+        $inp.closest('form').submit();
+      }, 400));
     });
   }
 

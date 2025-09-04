@@ -96,7 +96,7 @@ class Instruction_Indexer {
     /** Extrai itens da estrutura a partir de H2–H6 */
     protected function extract_items($post){
         $content = apply_filters('the_content',$post->post_content);
-        $html = wp_kses_post($content);
+        $html = (string)$content;
 
         // Captura H2..H6
         preg_match_all('/<(h[2-6])[^>]*>(.*?)<\/\\1>/is', $html, $matches, PREG_SET_ORDER);
@@ -247,10 +247,23 @@ class Instruction_Indexer {
         $ids = $this->next_pending_post_ids($batch);
         $count = 0;
         foreach($ids as $id){
-            $this->index_one($id,'',false,$mode);
-            $count++;
+            $res = $this->index_one($id,'',false,$mode);
+            if (is_array($res) && ($res['status'] ?? '') === 'ok'){
+                $count++;
+            }
         }
         return $count;
+    }
+
+    /** Marca itens de um post como pendentes quando o conteúdo muda */
+    public function mark_post_pending($post_id){
+        global $wpdb;
+        $post = get_post($post_id);
+        if (!$post || $post->post_status !== 'publish') return;
+        $wpdb->query($wpdb->prepare(
+            "UPDATE {$this->table} SET status='pending' WHERE post_id=%d AND status='indexed' AND last_post_modified_gmt <> %s",
+            $post_id, $post->post_modified_gmt
+        ));
     }
 
     /** Lista base de stopwords PT-BR (normalizadas sem acento) */

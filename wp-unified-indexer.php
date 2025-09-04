@@ -38,3 +38,10 @@ add_action('plugins_loaded', function(){
     if (is_admin()) { \WPUI\Admin::init(); }
     \WPUI\REST::init();
 });
+
+// Marca posts como pendentes quando forem atualizados
+add_action('save_post', function($post_id, $post){
+    if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) return;
+    (new \WPUI\Fulltext_Indexer())->mark_post_pending($post_id);
+    (new \WPUI\Instruction_Indexer())->mark_post_pending($post_id);
+}, 20, 2);
