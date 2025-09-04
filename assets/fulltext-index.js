@@ -82,15 +82,26 @@
     const url = $('.wpui-url-ft').val().trim();
     if (!id && !url){ uiToast('Informe ID ou URL.', 'error'); return; }
     setBusy($btn, true, 'Indexando...');
-    const json = await callAPI('fulltext/index-one', {id, url, force_reindex: true, mode:'manual'}, 'wpui_fulltext_index_one');
+    const json = await callAPI('fulltext/index-one', {id, url, mode:'manual'}, 'wpui_fulltext_index_one');
     setBusy($btn, false);
     if (json && (json.status==='ok' || json.success)){
       updateCounters('ft', {indexed:1});
       uiToast('Indexado com sucesso.');
       $('.wpui-refresh').trigger('click');
     } else if (json && json.status==='already_indexed'){
-      uiToast('Já indexado. Reindex feito.', 'success');
-      $('.wpui-refresh').trigger('click');
+      if (confirm(WPUI.i18n.already)){
+        setBusy($btn, true, 'Reindexando...');
+        const re = await callAPI('fulltext/index-one', {id, url, force_reindex: true, mode:'manual'}, 'wpui_fulltext_index_one');
+        setBusy($btn, false);
+        if (re && (re.status==='ok' || re.success)){
+          uiToast('Reindexado com sucesso.');
+          $('.wpui-refresh').trigger('click');
+        } else {
+          uiToast(WPUI.i18n.error, 'error');
+        }
+      } else {
+        uiToast(WPUI.i18n.already, 'info');
+      }
     } else {
       uiToast('Falha ao indexar.', 'error');
     }
