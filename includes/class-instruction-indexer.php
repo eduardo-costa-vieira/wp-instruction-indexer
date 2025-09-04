@@ -102,29 +102,41 @@ class Instruction_Indexer {
     /** Extrai itens da estrutura a partir de H2–H6 */
     protected function extract_items($post){
         $content = apply_filters('the_content',$post->post_content);
+        $content = strip_shortcodes($content);
         $html = wp_kses_post($content);
 
-        // Captura H2..H6
-        preg_match_all('/<(h[2-6])[^>]*>(.*?)<\/\\1>/is', $html, $matches, PREG_SET_ORDER);
         $items = [];
 
-        foreach($matches as $m){
-            $title = wp_strip_all_tags($m[2]);
+        $dom = new \DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
 
-            // Se começa com "1.2.3 Título", preservar o índice como item_id
-            if (preg_match('/^(\d+(?:\.\d+)*)\s*[-–—:]?\s*(.*)$/u', $title, $mm)){
-                $item_id = $mm[1];
-                $item_title = trim($mm[2]) ?: $title;
-            } else {
-                $item_id = '';
-                $item_title = $title;
+        // Remove blocos de shortcode
+        $xpath = new \DOMXPath($dom);
+        foreach ($xpath->query('//*[contains(@class,"wp-block-shortcode")]') as $node){
+            $node->parentNode->removeChild($node);
+        }
+
+        foreach (['h2','h3','h4','h5','h6'] as $tag){
+            foreach ($dom->getElementsByTagName($tag) as $node){
+                $title = wp_strip_all_tags($node->textContent);
+
+                // Se começa com "1.2.3 Título", preservar o índice como item_id
+                if (preg_match('/^(\d+(?:\.\d+)*)\s*[-–—:]?\s*(.*)$/u', $title, $mm)){
+                    $item_id = $mm[1];
+                    $item_title = trim($mm[2]) ?: $title;
+                } else {
+                    $item_id = '';
+                    $item_title = $title;
+                }
+
+                $items[] = [
+                    'item_id'    => $item_id,
+                    'item_title' => $item_title,
+                    'item_anchor'=> $this->build_anchor($post->ID, $item_id, $item_title),
+                ];
             }
-
-            $items[] = [
-                'item_id'    => $item_id,
-                'item_title' => $item_title,
-                'item_anchor'=> $this->build_anchor($post->ID, $item_id, $item_title),
-            ];
         }
 
         return $items;

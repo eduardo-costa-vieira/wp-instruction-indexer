@@ -1,0 +1,12 @@
+{
+    "name": "wpui/wp-instruction-indexer",
+    "type": "project",
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "WPUI\\": "includes/"
+        }
+    }
+}
