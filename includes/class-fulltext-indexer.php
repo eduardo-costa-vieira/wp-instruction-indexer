@@ -144,8 +144,10 @@ class Fulltext_Indexer {
         $ids = $this->next_pending_post_ids($batch);
         $count = 0;
         foreach($ids as $id){
-            $this->index_one($id,'',false,$mode);
-            $count++;
+            $res = $this->index_one($id,'',false,$mode);
+            if (is_array($res) && ($res['status'] ?? '') === 'ok'){
+                $count++;
+            }
         }
         return $count;
     }

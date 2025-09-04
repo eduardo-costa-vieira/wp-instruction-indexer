@@ -39,6 +39,7 @@ class Instruction_Index_Table extends \WP_List_Table {
             'url'                     => __('Link do Item','wp-unified-indexer'),
             'terms'                   => __('Termos','wp-unified-indexer'),
             'synonyms'                => __('Sinônimos','wp-unified-indexer'),
+            'expand'                  => __('Expandir','wp-unified-indexer'),
             'actions'                 => __('Ações','wp-unified-indexer'),
         ];
     }
@@ -72,6 +73,11 @@ class Instruction_Index_Table extends \WP_List_Table {
         return '<a href="#" class="button button-small wpui-syn-edit" data-post="'.$pid.'" data-item="'.$iid.'">'.__('Editar','wp-unified-indexer').'</a> '
              . '<a href="#" class="button button-primary button-small wpui-syn-save" data-post="'.$pid.'" data-item="'.$iid.'">'.__('Salvar','wp-unified-indexer').'</a> '
              . '<a href="#" class="button button-small wpui-syn-del" data-post="'.$pid.'" data-item="'.$iid.'">'.__('Excluir','wp-unified-indexer').'</a>';
+    }
+
+    protected function column_expand($item){
+        $pid = intval($item['post_id']);
+        return '<a href="#" class="button button-small wpui-expand" data-post="'.$pid.'">'.__('Expandir','wp-unified-indexer').'</a>';
     }
 
     public function prepare_items(){
