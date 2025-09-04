@@ -118,6 +118,8 @@
     if (json && (json.status==='ok' || json.success)){
       updateCounters('st', {indexed:1});
       uiToast('Estrutura indexada.');
+      $('.wpui-id-st, .wpui-url-st').val('');
+      $('.wpui-id-st').focus();
       $('.wpui-refresh').trigger('click');
     } else if (json && json.status==='no_items'){
       uiToast('Sem estrutura suficiente (mín. 3 itens).', 'error');

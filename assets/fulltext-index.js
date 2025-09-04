@@ -135,6 +135,8 @@
     if (json && (json.status==='ok' || json.success)){
       updateCounters('ft', {indexed:1});
       uiToast('Indexado com sucesso.');
+      $('.wpui-id-ft, .wpui-url-ft').val('');
+      $('.wpui-id-ft').focus();
       $('.wpui-refresh').trigger('click');
     } else if (json && json.status==='already_indexed'){
       uiToast(WPUI.i18n.already, 'error');
