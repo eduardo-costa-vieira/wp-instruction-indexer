@@ -104,6 +104,17 @@ class Admin {
             . '</div>';
     }
 
+    private static function search_input(){
+        $s = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
+        ?>
+        <p class="search-box">
+            <label class="screen-reader-text" for="wpui-search"><?php _e('Buscar por título','wp-unified-indexer'); ?></label>
+            <input type="search" id="wpui-search" name="s" value="<?php echo esc_attr($s); ?>" />
+            <?php submit_button(__('Buscar por título','wp-unified-indexer'), 'button', false, false, ['id' => 'search-submit']); ?>
+        </p>
+        <?php
+    }
+
     private static function render_fulltext_tab(){
         $table = new Fulltext_Index_Table();
         $table->prepare_items();
@@ -124,7 +135,7 @@ class Admin {
         <form method="get">
             <input type="hidden" name="page" value="wpui-indexer" />
             <input type="hidden" name="tab" value="fulltext" />
-            <?php $table->search_box(__('Buscar por título','wp-unified-indexer'), 'wpui-ft'); ?>
+            <?php self::search_input(); ?>
             <?php $table->display(); ?>
         </form><?php
     }
@@ -148,7 +159,7 @@ class Admin {
         <form method="get">
             <input type="hidden" name="page" value="wpui-indexer" />
             <input type="hidden" name="tab" value="structure" />
-            <?php $table->search_box(__('Buscar por título','wp-unified-indexer'), 'wpui-st'); ?>
+            <?php self::search_input(); ?>
             <?php $table->display(); ?>
         </form><?php
     }
@@ -161,7 +172,7 @@ class Admin {
         <form method="get">
             <input type="hidden" name="page" value="wpui-indexer" />
             <input type="hidden" name="tab" value="audit" />
-            <?php $table->search_box(__('Buscar por título','wp-unified-indexer'), 'wpui-audit'); ?>
+            <?php self::search_input(); ?>
             <?php $table->display(); ?>
         </form><?php
     }

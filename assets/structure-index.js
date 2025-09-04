@@ -217,6 +217,14 @@
       const href = $(this).attr('href') || window.location.href;
       window.location.href = href;
     });
+
+    // Busca com debounce
+    let searchTimer;
+    $('#wpui-search').off('input').on('input', function(){
+      clearTimeout(searchTimer);
+      const $form = $(this).closest('form');
+      searchTimer = setTimeout(()=>{ $form.submit(); }, 300);
+    });
   }
 
   $(document).ready(bind);
