@@ -35,6 +35,7 @@ class Fulltext_Index_Table extends \WP_List_Table {
             'indexed_at_gmt'          => __('Última Indexação','wp-unified-indexer'),
             'mode'                    => __('Modo','wp-unified-indexer'),
             'status'                  => __('Status','wp-unified-indexer'),
+            'expand'                  => __('Expandir','wp-unified-indexer'),
         ];
     }
 
@@ -47,6 +48,11 @@ class Fulltext_Index_Table extends \WP_List_Table {
     }
     protected function column_default($item, $column_name){
         return isset($item[$column_name]) ? esc_html($item[$column_name]) : '';
+    }
+
+    protected function column_expand($item){
+        $id = intval($item['post_id']);
+        return '<a href="#" class="button button-small wpui-expand" data-post="'.$id.'">'.__('Expandir','wp-unified-indexer').'</a>';
     }
 
     public function get_sortable_columns(){

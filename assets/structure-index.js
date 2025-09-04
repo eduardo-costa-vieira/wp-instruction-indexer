@@ -113,18 +113,18 @@
     const url = $('.wpui-url-st').val().trim();
     if (!id && !url){ uiToast('Informe ID ou URL.', 'error'); return; }
     setBusy($btn, true, 'Indexando...');
-    const json = await callAPI('structure/index-one', {id, url, force_reindex: false, mode:'manual'}, 'wpui_structure_index_one');
+    const json = await callAPI('structure/index-one', {id, url, mode:'manual'}, 'wpui_structure_index_one');
     setBusy($btn, false);
     if (json && (json.status==='ok' || json.success)){
       updateCounters('st', {indexed:1});
       uiToast('Estrutura indexada.');
-      $('.wpui-id-st, .wpui-url-st').val('');
       $('.wpui-refresh').trigger('click');
     } else if (json && json.status==='no_items'){
       uiToast('Sem estrutura suficiente (mín. 3 itens).', 'error');
     } else {
       uiToast('Falha ao indexar.', 'error');
     }
+    $('.wpui-id-st, .wpui-url-st').val('');
   }
 
   // Expandir: carregar itens por post_id e mostrar modal
