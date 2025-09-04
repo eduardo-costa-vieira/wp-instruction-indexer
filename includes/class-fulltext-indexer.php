@@ -143,4 +143,18 @@ class Fulltext_Indexer {
         }
         return $count;
     }
+
+    /** Marca post como pendente quando o conteúdo muda */
+    public function mark_post_pending($post_id){
+        global $wpdb;
+        $post = get_post($post_id);
+        if (!$post || $post->post_status !== 'publish') return;
+        $row = $wpdb->get_row($wpdb->prepare(
+            "SELECT id,last_post_modified_gmt FROM {$this->table} WHERE post_id=%d AND status='indexed' LIMIT 1",
+            $post_id
+        ));
+        if ($row && $row->last_post_modified_gmt !== $post->post_modified_gmt){
+            $wpdb->update($this->table, ['status'=>'pending'], ['id'=>$row->id], ['%s'], ['%d']);
+        }
+    }
 }
