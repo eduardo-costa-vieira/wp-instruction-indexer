@@ -214,10 +214,13 @@
     // Refresh
     $('.wpui-refresh').off('click').on('click', function(e){
       e.preventDefault();
-      const href = $(this).attr('href') || window.location.href;
-      window.location.href = href;
+      window.location.reload();
     });
   }
 
-  $(document).ready(bind);
+  $(document).ready(()=>{
+    bind();
+    // Após recarregar, foca o campo de busca
+    $('.wpui-wrap').find('input[type="search"]').first().trigger('focus');
+  });
 })(jQuery);
