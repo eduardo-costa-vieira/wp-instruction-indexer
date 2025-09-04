@@ -97,12 +97,24 @@
     const url = $('.wpui-url-st').val().trim();
     if (!id && !url){ uiToast('Informe ID ou URL.', 'error'); return; }
     setBusy($btn, true, 'Indexando...');
-    const json = await callAPI('structure/index-one', {id, url, force_reindex: true, mode:'manual'}, 'wpui_structure_index_one');
+    let json = await callAPI('structure/index-one', {id, url, mode:'manual'}, 'wpui_structure_index_one');
     setBusy($btn, false);
     if (json && (json.status==='ok' || json.success)){
       updateCounters('st', {indexed:1});
       uiToast('Estrutura indexada.');
       $('.wpui-refresh').trigger('click');
+    } else if (json && json.status==='already_indexed'){
+      if (window.confirm(WPUI.i18n.already)){
+        setBusy($btn, true, 'Reindexando...');
+        json = await callAPI('structure/index-one', {id, url, force_reindex:true, mode:'manual'}, 'wpui_structure_index_one');
+        setBusy($btn, false);
+        if (json && (json.status==='ok' || json.success)){
+          uiToast('Estrutura reindexada.');
+          $('.wpui-refresh').trigger('click');
+        } else {
+          uiToast(WPUI.i18n.error, 'error');
+        }
+      }
     } else if (json && json.status==='no_items'){
       uiToast('Sem estrutura suficiente (mín. 3 itens).', 'error');
     } else {
