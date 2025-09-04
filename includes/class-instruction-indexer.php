@@ -83,6 +83,12 @@ class Instruction_Indexer {
         return null;
     }
 
+    /** Remove o índice de um post para reprocessamento */
+    public function unindex($post_id){
+        global $wpdb;
+        $wpdb->delete($this->table, ['post_id'=>intval($post_id)]);
+    }
+
     /** Normaliza texto (minúsculas, sem acentos, sem pontuação) */
     protected function normalize($text){
         $text = wp_strip_all_tags((string)$text);

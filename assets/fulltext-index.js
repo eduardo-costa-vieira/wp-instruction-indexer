@@ -82,15 +82,16 @@
     const url = $('.wpui-url-ft').val().trim();
     if (!id && !url){ uiToast('Informe ID ou URL.', 'error'); return; }
     setBusy($btn, true, 'Indexando...');
-    const json = await callAPI('fulltext/index-one', {id, url, force_reindex: true, mode:'manual'}, 'wpui_fulltext_index_one');
+    const json = await callAPI('fulltext/index-one', {id, url, force_reindex: false, mode:'manual'}, 'wpui_fulltext_index_one');
     setBusy($btn, false);
     if (json && (json.status==='ok' || json.success)){
       updateCounters('ft', {indexed:1});
       uiToast('Indexado com sucesso.');
+      $('.wpui-id-ft, .wpui-url-ft').val('');
       $('.wpui-refresh').trigger('click');
     } else if (json && json.status==='already_indexed'){
-      uiToast('Já indexado. Reindex feito.', 'success');
-      $('.wpui-refresh').trigger('click');
+      uiToast(WPUI.i18n.already, 'error');
+      $('.wpui-id-ft, .wpui-url-ft').val('');
     } else {
       uiToast('Falha ao indexar.', 'error');
     }
@@ -121,8 +122,16 @@
     // Refresh (forçar clean reload da página atual)
     $('.wpui-refresh').off('click').on('click', function(e){
       e.preventDefault();
-      const href = $(this).attr('href') || window.location.href;
-      window.location.href = href;
+      window.location.reload();
+    });
+
+    // Search as you type
+    $('#wpui-ft-search-input').on('keyup', function(){
+      const q = $(this).val().toLowerCase();
+      $('table.wp-list-table tbody tr').each(function(){
+        const t = $(this).find('td.column-post_title').text().toLowerCase();
+        $(this).toggle(t.indexOf(q) !== -1);
+      });
     });
   }
 

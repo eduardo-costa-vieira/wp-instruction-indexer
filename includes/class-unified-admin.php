@@ -66,7 +66,7 @@ class Admin {
             'counts_ft' => $counts_ft,
             'counts_st' => $counts_st,
             'i18n' => [
-                'already' => __('Instrução já está indexada. Deseja reindexar?','wp-unified-indexer'),
+                'already' => __('Instrução já indexada.','wp-unified-indexer'),
                 'error' => __('Ocorreu um erro.','wp-unified-indexer'),
                 'saved' => __('Sinônimos salvos.','wp-unified-indexer'),
                 'deleted' => __('Item excluído.','wp-unified-indexer'),

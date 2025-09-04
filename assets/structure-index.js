@@ -97,11 +97,12 @@
     const url = $('.wpui-url-st').val().trim();
     if (!id && !url){ uiToast('Informe ID ou URL.', 'error'); return; }
     setBusy($btn, true, 'Indexando...');
-    const json = await callAPI('structure/index-one', {id, url, force_reindex: true, mode:'manual'}, 'wpui_structure_index_one');
+    const json = await callAPI('structure/index-one', {id, url, force_reindex: false, mode:'manual'}, 'wpui_structure_index_one');
     setBusy($btn, false);
     if (json && (json.status==='ok' || json.success)){
       updateCounters('st', {indexed:1});
       uiToast('Estrutura indexada.');
+      $('.wpui-id-st, .wpui-url-st').val('');
       $('.wpui-refresh').trigger('click');
     } else if (json && json.status==='no_items'){
       uiToast('Sem estrutura suficiente (mín. 3 itens).', 'error');
@@ -214,8 +215,16 @@
     // Refresh
     $('.wpui-refresh').off('click').on('click', function(e){
       e.preventDefault();
-      const href = $(this).attr('href') || window.location.href;
-      window.location.href = href;
+      window.location.reload();
+    });
+
+    // Search as you type
+    $('#wpui-st-search-input').on('keyup', function(){
+      const q = $(this).val().toLowerCase();
+      $('table.wp-list-table tbody tr').each(function(){
+        const t = $(this).find('td.column-post_title').text().toLowerCase();
+        $(this).toggle(t.indexOf(q) !== -1);
+      });
     });
   }
 
