@@ -33,6 +33,22 @@ require_once WPUI_DIR . 'includes/class-fulltext-index-table.php';
 require_once WPUI_DIR . 'includes/class-instruction-index-table.php';
 require_once WPUI_DIR . 'includes/class-instruction-audit-table.php';
 
+// Invalida índices ao atualizar posts publicados
+add_action('save_post', function($post_id, $post, $update){
+    if (wp_is_post_autosave($post_id) || wp_is_post_revision($post_id)) return;
+    if ($post->post_status !== 'publish') return;
+
+    $ft = new \WPUI\Fulltext_Indexer();
+    if (in_array($post->post_type, $ft->post_types(), true)) {
+        $ft->unindex($post_id);
+    }
+
+    $st = new \WPUI\Instruction_Indexer();
+    if (in_array($post->post_type, $st->post_types(), true)) {
+        $st->unindex($post_id);
+    }
+}, 10, 3);
+
 // Bootstrap
 add_action('plugins_loaded', function(){
     if (is_admin()) { \WPUI\Admin::init(); }

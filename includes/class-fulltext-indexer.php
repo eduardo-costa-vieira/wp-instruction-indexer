@@ -67,6 +67,12 @@ class Fulltext_Indexer {
         return null;
     }
 
+    /** Remove o índice de um post específico */
+    public function unindex($post_id){
+        global $wpdb;
+        $wpdb->delete($this->table, ['post_id'=>intval($post_id)]);
+    }
+
     /** Hash simples do conteúdo para comparação */
     protected function content_hash($content){
         return md5(wp_strip_all_tags((string)$content));
