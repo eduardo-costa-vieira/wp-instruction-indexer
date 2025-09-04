@@ -18,6 +18,9 @@ class Fulltext_Indexer {
     public function __construct(){
         global $wpdb;
         $this->table = $wpdb->prefix.'wpui_fulltext_index';
+        foreach($this->post_types() as $type){
+            add_action("save_post_{$type}", [$this, 'mark_pending']);
+        }
     }
 
     /** Cria/atualiza tabela (executado na ativação e ao abrir a tela do admin) */
@@ -55,8 +58,22 @@ class Fulltext_Indexer {
         $in = implode("','", array_map('esc_sql', $types));
         $published = intval($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status='publish' AND post_type IN ('{$in}')"));
         $indexed = intval($wpdb->get_var("SELECT COUNT(DISTINCT post_id) FROM {$this->table} WHERE status='indexed'"));
-        $pending = max(0, $published - $indexed);
+        $pending_records = intval($wpdb->get_var("SELECT COUNT(DISTINCT post_id) FROM {$this->table} WHERE status='pending'"));
+        $pending = max(0, $published - $indexed - $pending_records) + $pending_records;
         return compact('published','indexed','pending');
+    }
+
+    /** Marca o post para reindexação ou remove o registro */
+    public function mark_pending($post_id){
+        if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) return;
+        $post = get_post($post_id);
+        if (!$post) return;
+        global $wpdb;
+        if ($post->post_status !== 'publish'){
+            $wpdb->delete($this->table, ['post_id' => $post_id]);
+            return;
+        }
+        $wpdb->update($this->table, ['status' => 'pending'], ['post_id' => $post_id]);
     }
 
     /** Resolve post por ID ou URL */
