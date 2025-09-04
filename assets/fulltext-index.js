@@ -188,6 +188,14 @@
       const $form = $(this).closest('form');
       stTimer = setTimeout(()=> $form.submit(), 350);
     });
+
+    // Busca com debounce
+    let searchTimer;
+    $('#wpui-search').off('input').on('input', function(){
+      clearTimeout(searchTimer);
+      const $form = $(this).closest('form');
+      searchTimer = setTimeout(()=>{ $form.submit(); }, 300);
+    });
   }
 
   $(document).ready(bind);

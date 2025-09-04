@@ -242,6 +242,14 @@
         $(this).toggle(t.indexOf(q) !== -1);
       });
     });
+
+    // Busca com debounce
+    let searchTimer;
+    $('#wpui-search').off('input').on('input', function(){
+      clearTimeout(searchTimer);
+      const $form = $(this).closest('form');
+      searchTimer = setTimeout(()=>{ $form.submit(); }, 300);
+    });
   }
 
   $(document).ready(bind);
