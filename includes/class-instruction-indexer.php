@@ -246,11 +246,16 @@ class Instruction_Indexer {
     public function index_all($batch=10,$mode='auto'){
         $ids = $this->next_pending_post_ids($batch);
         $count = 0;
+        $fails = 0;
         foreach($ids as $id){
-            $this->index_one($id,'',false,$mode);
-            $count++;
+            $res = $this->index_one($id,'',false,$mode);
+            if (is_array($res) && ($res['status'] ?? '') === 'ok'){
+                $count++;
+            } else {
+                $fails++;
+            }
         }
-        return $count;
+        return ['processed'=>$count, 'failed'=>$fails];
     }
 
     /** Lista base de stopwords PT-BR (normalizadas sem acento) */
